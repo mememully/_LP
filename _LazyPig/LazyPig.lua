@@ -458,9 +458,6 @@ function LazyPig_OnEvent(event)
 
 	elseif (LPCONFIG.SALVA and (event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player") or event == "UNIT_INVENTORY_CHANGED")) then
 		LazyPig_CheckSalvation()
-		
-	elseif (LPCONFIG.SALVA and (event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player") or event == "UNIT_INVENTORY_CHANGED")) then
-		LazyPig_CheckSalvation()
 
 	elseif (LPCONFIG.INTSPIRIT and (event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" or event == "UNIT_INVENTORY_CHANGED")) then
 		LazyPig_CheckIntSpirit()
