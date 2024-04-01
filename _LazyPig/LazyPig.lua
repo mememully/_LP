@@ -32,7 +32,8 @@ LPCONFIG = {
 	SHIFTSPLIT = true, 
 	REZ = true, 
 	GOSSIP = true, 
-	SALVA = false
+	SALVA = false,
+	INTSPIRIT = false
 }
 
 BINDING_HEADER_LP_HEADER = "_LazyPig";
