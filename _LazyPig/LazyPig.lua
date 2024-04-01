@@ -2031,7 +2031,7 @@ function LazyPig_CancelSalvationBuff()
 end
 
 function LazyPig_CancelIntSpiritBuffs()
-	local buff = {"Spell_Holy_MagicalSentry", "Spell_Holy_ArcaneIntellect", "Spell_Holy_PrayerofSpirit"}
+	local buff = {"Spell_Holy_MagicalSentry", "Spell_Holy_ArcaneIntellect", "Spell_Holy_PrayerofSpirit", "Spell_Holy_Divinespirit"}
 	local counter = 0
 	while GetPlayerBuff(counter) >= 0 do
 		local index, untilCancelled = GetPlayerBuff(counter)
