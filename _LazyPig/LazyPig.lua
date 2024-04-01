@@ -160,7 +160,7 @@ local LazyPigMenuStrings = {
 		[98]= "Gossip Auto Processing",
 		[99]= "Character Auto-Save",
 		[100]= "Auto Dismount",
-		[101]= "Chat Spam Filter"
+		[103]= "Int & Spirit remover"
 }
 
 function LazyPig_OnLoad()
@@ -223,22 +223,21 @@ function LazyPig_OnUpdate()
 		ctrlalttime = 0
 		altshifttime = 0
 	end
+		
+	if shift_time == current_time  then	
+		if not (UnitExists("target") and UnitIsUnit("player", "target")) then
+			--
+		elseif not battleframe then
+			battleframe = current_time
+		elseif (current_time - battleframe) > 3 then
+			BattlefieldFrame:Show()
+			battleframe = current_time
+		end
+	elseif battleframe then
+		battleframe = nil
+	end
 			
 	if LPCONFIG.SPECIALKEY then
-		--[[
-		if shift_time == current_time  then	
-			if not (UnitExists("target") and UnitIsUnit("player", "target")) then
-				--
-			elseif not battleframe then
-				battleframe = current_time
-			elseif (current_time - battleframe) > 3 then
-				BattlefieldFrame:Show()
-				battleframe = current_time
-			end
-		elseif battleframe then
-			battleframe = nil
-		end
-		--]]
 		if ctrlstatus and shiftstatus and altstatus and current_time > delayaction then
 			delayaction = current_time + 1
 			Logout();
@@ -345,6 +344,7 @@ function LazyPig_OnUpdate()
 	end
 	
 	LazyPig_CheckSalvation();
+	LazyPig_CheckIntSpirit();
 	ScheduleButtonClick();
 	ScheduleFunctionLaunch();
 	ScheduleItemSplit();
@@ -436,6 +436,7 @@ function LazyPig_OnEvent(event)
 		LazyPigKeybindsFrame = LazyPig_CreateKeybindsFrame()
 
 		LazyPig_CheckSalvation();
+		LazyPig_CheckIntSpirit();
 		Check_Bg_Status();
 		LazyPig_AutoLeaveBG();
 		LazyPig_AutoSummon();
@@ -454,6 +455,9 @@ function LazyPig_OnEvent(event)
 		--SendChatMessage(".xp 8", "SAY") --qgaming version
 		--SendChatMessage(".exp 5", "SAY") --scriptcraft version
 
+	elseif (LPCONFIG.SALVA and (event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player") or event == "UNIT_INVENTORY_CHANGED")) then
+		LazyPig_CheckSalvation()
+		
 	elseif (LPCONFIG.SALVA and (event == "PLAYER_AURAS_CHANGED" or event == "UPDATE_BONUS_ACTIONBAR" and LazyPig_PlayerClass("Druid", "player") or event == "UNIT_INVENTORY_CHANGED")) then
 		LazyPig_CheckSalvation()
 		
@@ -621,9 +625,7 @@ function LazyPig_OnEvent(event)
 		for i=1, getn(GossipOptions) do
 			if GossipOptions[i] == "binder" then
 				local bind = GetBindLocation();
-	
-				--if not (bind == GetSubZoneText() or bind == GetZoneText() or bind == GetRealZoneText() or bind == GetMinimapZoneText()) then
-				if bind ~= GetSubZoneText() then
+				if not (bind == GetSubZoneText() or bind == GetZoneText() or bind == GetRealZoneText() or bind == GetMinimapZoneText()) then
 					gossipbreak = true
 				end	
 			elseif gossipnr then
@@ -1239,7 +1241,7 @@ end
 
 function LazyPig_Dungeon()
 	local t = GetRealZoneText()
-	if t =="Dire Maul" or t =="Stratholme"  or t =="Scholomance" or t =="Blackrock Depths" or t =="Sunken Temple" or t =="The Stockade" or t =="Zul'Farrak" or t =="Scarlet Monastery" or t =="Gnomeregan" or t =="The Deadmines" or t=="Blackfathom Deeps" or t=="Wailing Caverns" or t=="Razorfen Downs" or t=="Razorfen Kraul" or t=="Ragefire Chasm" or t=="Shadowfang Keep" then 
+	if t =="Dire Maul" or t =="Stratholme"  or t =="Scholomance" or t =="Blackrock Depths" or t =="Sunken Temple" or t =="The Stockade" or t =="Zul'Farrak" or t =="Scarlet Monastery" or t =="Gnomeregan" or t =="The Deadmines" or t=="Blackfathom Deeps" or t=="Wailing Caverns" or t=="Razorfen Downs" or t=="Razorfen Kraul" then 
 		return true
 	end
 	return false
@@ -1450,11 +1452,7 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 			end
 			return
 		
-		elseif LPCONFIG.RIGHT and tradestatus and not IsShiftKeyDown() and not IsAltKeyDown() then
-			if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot attach item", 1, 0.5, 0);
-				return
-			end
+		elseif LPCONFIG.RIGHT and tradestatus and not IsShiftKeyDown() and not IsAltKeyDown() and LazyPig_ItemIsTradeable(ParentID,ItemID) then
 			PickupContainerItem(ParentID,ItemID)
 			local slot = TradeFrame_GetAvailableSlot()
 			if slot then ClickTradeButton(slot) end
@@ -1464,10 +1462,6 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 			return
 			
 		elseif LPCONFIG.RIGHT and GMailFrame and GMailFrame:IsVisible() and not CursorHasItem() then
-			if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot attach item", 1, 0.5, 0);
-				return
-			end
 			local i
 			local bag, item = ParentID,ItemID
 			for i = 1, GMAIL_NUMITEMBUTTONS, 1 do
@@ -1486,10 +1480,6 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 			end
 		
 		elseif LPCONFIG.RIGHT and CT_MailFrame and CT_MailFrame:IsVisible() and not IsShiftKeyDown() and not IsAltKeyDown() then
-			if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot attach item", 1, 0.5, 0);
-				return
-			end
 			local bag, item = ParentID,ItemID
 			if ( ( CT_Mail_GetItemFrame(bag, item) or ( CT_Mail_addItem and CT_Mail_addItem[1] == bag and CT_Mail_addItem[2] == item ) ) and not special ) then
 				return;
@@ -1516,6 +1506,7 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 					end
 				end
 			end
+
 		elseif LPCONFIG.RIGHT and mailstatus and not IsShiftKeyDown() and not IsAltKeyDown() then
 			if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
 				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot attach item", 1, 0.5, 0);
@@ -1534,9 +1525,10 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 				end
 				return
 			end	
+
 		elseif LPCONFIG.RIGHT and auctionstatus and not IsShiftKeyDown() and not IsAltKeyDown() then
 			if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot attach item", 1, 0.5, 0);
+				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Cannot sell item", 1, 0.5, 0);
 				return
 			end
 			if not AuctionFrameAuctions:IsVisible() then
@@ -1549,68 +1541,8 @@ function LazyPig_UseContainerItem(ParentID,ItemID)
 				ClearCursor()
 			end
 			return
-		elseif LPCONFIG.RIGHT and auctionstatus and IsAltKeyDown() then
-			if not LazyPig_ItemIsTradeable(ParentID,ItemID) then
-				DEFAULT_CHAT_FRAME:AddMessage("LazyPig: Item is not tradeable", 1, 0.5, 0);
-				return
-			end
-			if not AuctionFrameBrowse:IsVisible() then
-				AuctionFrameTab1:Click()
-				return
-			end
-			if LazyPig_AuctionSearch(GetContainerItemLink(ParentID,ItemID)) then 
-				return 
-			end
 		end	
 		OriginalUseContainerItem(ParentID,ItemID)
-		
-		
-end
-
-function LazyPig_AuctionSearch(link)
-    if link and not strfind(link,"item:") then return end
-    BrowseMinLevel:SetText('')
-    BrowseMaxLevel:SetText('')
-    UIDropDownMenu_SetText('',BrowseDropDown)
-    UIDropDownMenu_SetSelectedName(BrowseDropDown)
-    local name,il,ir,iml,class,sub
-    if link then
-      local i,j,name = strfind(link,"%[(.+)%]")
-      BrowseName:SetText(name)
-      BrowseName:HighlightText(0,-1)
-      IsUsableCheckButton:SetChecked(false)
-      local i,j,item = strfind(link,"(item:%d+:%d+:%d+:%d+)")
-      name,il,ir,iml,class,sub = GetItemInfo(item)
-    else
-      BrowseName:SetText('')
-      IsUsableCheckButton:SetChecked(true)
-      class = 'Recipe'; sub = class
-    end
-    AuctionFrameBrowse.selectedClass = class
-    for ix,name in CLASS_FILTERS do
-      if name==class then
-        AuctionFrameBrowse.selectedClassIndex = ix
-        i = ix
-        break
-      end
-    end
-    if class~=sub then
-      AuctionFrameBrowse.selectedSubclass = HIGHLIGHT_FONT_COLOR_CODE..sub..FONT_COLOR_CODE_CLOSE
-      for ix,name in {GetAuctionItemSubClasses(i)} do
-        if name==sub then
-          AuctionFrameBrowse.selectedSubclassIndex = ix
-          break
-        end
-      end
-    else
-      AuctionFrameBrowse.selectedSubclass = nil
-      AuctionFrameBrowse.selectedSubclassIndex = nil
-    end
-    AuctionFrameBrowse.selectedInvtype = nil
-    AuctionFrameBrowse.selectedInvtypeIndex = nil
-    AuctionFrameFilters_Update()
-    BrowseSearchButton:Click()
-    return 1
 end
 
 function ScheduleItemSplit(sbag, sslot, dbag, dslot, count)
@@ -1747,6 +1679,7 @@ function LazyPig_GetOption(num)
 	or num == 99 and LPCONFIG.NOSAVE ~= GetRealmName()
 	or num == 100 and LPCONFIG.DISMOUNT
 	or num == 101 and LPCONFIG.SPAM
+	or num == 103 and LPCONFIG.INTSPIRIT == 1
 	
 	or nil then
 		this:SetChecked(true);
@@ -1886,12 +1819,20 @@ function LazyPig_SetOption(num)
 		if not checked then LPCONFIG.SALVA = nil end
 		LazyPigMenuObjects[61]:SetChecked(nil)
 		LazyPig_CheckSalvation()
+	elseif num == 103 then
+		LPCONFIG.INTSPIRIT = 1
+		if not checked then LPCONFIG.INTSPIRIT = nil end
+		LazyPig_CheckIntSpirit()
 	elseif num == 61 then 
 		LPCONFIG.SALVA = 2
 		if not checked then LPCONFIG.SALVA = nil end
 		LazyPigMenuObjects[60]:SetChecked(nil)
 		LazyPig_CheckSalvation()
-
+		
+		
+		
+		
+		
 	elseif num == 70 then --fixed
 		LPCONFIG.SPAM = true
 		if not checked then LPCONFIG.SPAM = nil end
@@ -2085,9 +2026,37 @@ function LazyPig_CancelSalvationBuff()
 	return nil
 end
 
+function LazyPig_CancelIntSpiritBuffs()
+	local buff = {"Spell_Holy_MagicalSentry", "Spell_Holy_ArcaneIntellect", "Spell_Holy_PrayerofSpirit"}
+	local counter = 0
+	while GetPlayerBuff(counter) >= 0 do
+		local index, untilCancelled = GetPlayerBuff(counter)
+		if untilCancelled ~= 1 then
+			local i =1
+			while buff[i] do
+				if string.find(GetPlayerBuffTexture(index), buff[i]) then
+					CancelPlayerBuff(index);
+					UIErrorsFrame:Clear();
+					UIErrorsFrame:AddMessage("Intellect and Spirit Removed");
+					return
+				end
+				i = i + 1
+			end	
+		end
+		counter = counter + 1
+	end
+	return nil
+end
+
 function LazyPig_CheckSalvation()
 	if(LPCONFIG.SALVA == 1 or LPCONFIG.SALVA == 2 and (LazyPig_IsShieldEquipped() and LazyPig_PlayerClass("Warrior", "player") or LazyPig_IsBearForm())) then
 		LazyPig_CancelSalvationBuff()
+	end
+end
+
+function LazyPig_CheckIntSpirit()
+	if(LPCONFIG.INTSPIRIT == 1) then
+		LazyPig_CancelIntSpiritBuffs()
 	end
 end
 

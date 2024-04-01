@@ -56,7 +56,7 @@ local CheckBoxTables = {
 		[0] = "LazyPigCheckboxGroupSingleChoice",
 		[1] = { "LazyPigCheckbox90", "Summon Auto Accept", "If checked summons will be accepted before they expire" },
 		[2] = { "LazyPigCheckbox91", "Loot Window Auto Position", "Position the loot window under the mouse-cursor"},
-		[3] = { "LazyPigCheckbox92", "Improved Right Click", "Right Click to Drag and Drop Items into Mail, Trade, Auction Frames. Alt + Right Click results search auction for that item" },
+		[3] = { "LazyPigCheckbox92", "Improved Right Click", "Right Click to Drag and Drop Items into Mail, Trade, Auction Frames " },
 		[4] = { "LazyPigCheckbox93", "Easy Split/Merge (Shift+Right_Click)", "???"},
 		[5] = { "LazyPigCheckbox94", "Extended Camera Distance", "Extend the Camera Distance to its maximum" },
 		[6] = { "LazyPigCheckbox95", "Special Key Combinations", "Activate the Special-Key-Combinations" },
@@ -65,6 +65,7 @@ local CheckBoxTables = {
 		[9] = { "LazyPigCheckbox98", "Gossip Auto Processing", "Skip Gossip-Windows-Choises from Innkeepers and FlyMasters" },
 		[10] = { "LazyPigCheckbox99", "Character Auto-Save", "Use the .save command when....when?" },
 		[11] = { "LazyPigCheckbox100", "Auto Dismount", "Auto-Dismount when it's required by another action" },
+		[12] = { "LazyPigCheckbox103", "Int & Spirit remover", "If checked removes those buffs" },
 		--[12] = { "LazyPigCheckbox101", "Chat Spam Filter", "One minute ban for identical messages" },
 		--[12] = { "LazyPigCheckbox102", "Block Battleground Quest Sharing", "Really? No more 'Stable' spam?" }
 	},
@@ -140,7 +141,7 @@ function LazyPig_CreateOptionsFrame()
 	frame:SetScale(.81)
 
 	frame:SetWidth(480)
-	frame:SetHeight(428)
+	frame:SetHeight(442)
 	
 	frame:SetPoint("TOPLEFT", nil, "TOPLEFT", 250, -50)
 	frame:SetBackdrop( {
